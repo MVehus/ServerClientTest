@@ -34,11 +34,19 @@ public class Server {
                 System.out.println("Client connected");
             }
 
-            while (true){
-                if(!messages.isEmpty()){
-                    sendToAllClients(messages.poll());
+            Thread messageHandling = new Thread(() -> {
+                while(true){
+                    try{
+                        String message = messages.poll();
+                        sendToAllClients(message);
+                        System.out.println("Message received");
+                    } catch (Exception e) {
+                        System.out.println(e.toString());
+                    }
                 }
-            }
+            });
+            messageHandling.setDaemon(true);
+            messageHandling.start();
 
         } catch (IOException e) {
             System.out.println(e.toString());
@@ -72,7 +80,8 @@ public class Server {
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
                         System.out.println("Message: " + inputLine + " from " + clientSocket.toString());
-                        this.write(inputLine);
+                        messages.add(inputLine);
+                        //this.write(inputLine);
                     }
                 }
             } catch (Exception e) {

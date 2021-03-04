@@ -36,9 +36,6 @@ public class Client {
         }
     }
 
-    private class clientSideConnection {
-
-    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
