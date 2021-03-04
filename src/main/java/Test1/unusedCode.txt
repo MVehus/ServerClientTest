@@ -1,0 +1,58 @@
+while (clients.size() < 8) {
+                clientSocket = serverSocket.accept();
+                ServerSideConnection ssc = new ServerSideConnection(clientSocket);
+                clients.add(ssc);
+                new Thread(ssc).start();
+                System.out.println("Client connected");
+            }
+
+
+
+
+try {
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+                while (true) {
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        System.out.println("Message: " + inputLine + " from " + clientSocket.toString());
+                        messages.add(inputLine);
+                        //this.write(inputLine);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+
+
+
+
+
+while (true) {
+                String userInput;
+                String inputFromServer;
+                if ((userInput = stdIn.readLine()) != null) {
+                    out.println(userInput);
+                }
+                if ((inputFromServer = in.readLine()) != null) {
+                    System.out.println(inputFromServer);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+
+
+
+
+ /*
+                while ((userInput = stdIn.readLine()) != null) {
+                    out.println(userInput);
+                    System.out.println(in.readLine());
+                }
+                if(in.readLine() != null) {
+                    System.out.println(in.readLine());
+                }
+
+                 */

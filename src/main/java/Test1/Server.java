@@ -2,20 +2,21 @@ package Test1;
 
 import Utilities.IpChecker;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Server {
 
     private ServerSocket serverSocket;
-    private Socket clientSocket;
     private ArrayList<ServerSideConnection> clients;
-    private Queue<String> messages;
+    private LinkedBlockingQueue<String> messages;
+    Socket clientSocket;
 
     public Server(int port) {
         try {
@@ -24,7 +25,19 @@ public class Server {
             System.out.println("Server IP: " + IpChecker.getIp() + "\nPort: " + port);
             System.out.println("Waiting for clients...");
             clients = new ArrayList<>();
-            messages = new LinkedList<>();
+            messages = new LinkedBlockingQueue<>();
+
+            new Thread(() -> {
+                while (true) {
+                    if (!messages.isEmpty()) {
+                        try {
+                            sendToAllClients(messages.take());
+                        } catch (Exception e) {
+                            System.out.println(e.toString());
+                        }
+                    }
+                }
+            }).start();
 
             while (clients.size() < 8) {
                 clientSocket = serverSocket.accept();
@@ -33,21 +46,7 @@ public class Server {
                 new Thread(ssc).start();
                 System.out.println("Client connected");
             }
-
-            Thread messageHandling = new Thread(() -> {
-                while(true){
-                    try{
-                        if(!messages.isEmpty()) {
-                            String message = messages.poll();
-                            sendToAllClients(message);
-                        }
-                    } catch (Exception e) {
-                        System.out.println(e.toString());
-                    }
-                }
-            });
-            messageHandling.setDaemon(true);
-            messageHandling.start();
+            System.out.println("Maximum number of players have joined the game. Not accepting more connections");
 
         } catch (IOException e) {
             System.out.println(e.toString());
@@ -59,7 +58,6 @@ public class Server {
             client.write(str);
         }
     }
-
 
     private class ServerSideConnection implements Runnable {
 
@@ -79,10 +77,9 @@ public class Server {
 
                 while (true) {
                     String inputLine;
-                    while ((inputLine = in.readLine()) != null) {
+                    if ((inputLine = in.readLine()) != null) {
                         System.out.println("Message: " + inputLine + " from " + clientSocket.toString());
-                        messages.add(inputLine);
-                        //this.write(inputLine);
+                        messages.put(inputLine);
                     }
                 }
             } catch (Exception e) {
@@ -98,6 +95,7 @@ public class Server {
             }
         }
     }
+
 
     public static void main(String[] args) {
         Server server = new Server(32401);
