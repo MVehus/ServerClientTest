@@ -6,14 +6,16 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Observable;
-import java.util.Observer;
+import java.util.Queue;
 
-public class Server implements Observer {
+public class Server {
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private ArrayList<ServerSideConnection> clients;
+    private Queue<String> messages;
 
     public Server(int port) {
         try {
@@ -22,13 +24,20 @@ public class Server implements Observer {
             System.out.println("Server IP: " + IpChecker.getIp() + "\nPort: " + port);
             System.out.println("Waiting for clients...");
             clients = new ArrayList<>();
+            messages = new LinkedList<>();
 
-            while (true) {
+            while (clients.size() < 2) {
                 clientSocket = serverSocket.accept();
                 ServerSideConnection ssc = new ServerSideConnection(clientSocket);
                 clients.add(ssc);
                 new Thread(ssc).start();
                 System.out.println("Client connected");
+            }
+
+            while (true){
+                if(!messages.isEmpty()){
+                    sendToAllClients(messages.poll());
+                }
             }
 
         } catch (IOException e) {
@@ -42,21 +51,15 @@ public class Server implements Observer {
         }
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        sendToAllClients(arg.toString());
-    }
 
-    private class ServerSideConnection extends Observable implements Runnable {
+    private class ServerSideConnection implements Runnable {
 
         private BufferedReader in;
         private PrintWriter out;
         Socket socket;
-        //String inputLine;
 
         public ServerSideConnection(Socket clientSocket) {
             socket = clientSocket;
-            //addObserver(Server.this);
         }
 
         @Override
@@ -69,8 +72,7 @@ public class Server implements Observer {
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
                         System.out.println("Message: " + inputLine + " from " + clientSocket.toString());
-                        //this.write(inputLine);
-                        Server.this.sendToAllClients(inputLine);
+                        this.write(inputLine);
                     }
                 }
             } catch (Exception e) {

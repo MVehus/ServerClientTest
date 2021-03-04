@@ -27,4 +27,31 @@ public class main {
 
 
     }
+
+    public JSONObject createJSON(StudentInfo si){
+        StudentInfo student = new StudentInfo("Mathias", 1);
+        JSONObject studentObj = new JSONObject();
+
+
+        return studentObj;
+    }
+
+    private class StudentInfo {
+
+        private String name;
+        private int id;
+
+        public StudentInfo(String studentName, int studentId){
+            name = studentName;
+            id = studentId;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
 }
