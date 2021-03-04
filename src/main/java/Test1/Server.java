@@ -26,7 +26,7 @@ public class Server {
             clients = new ArrayList<>();
             messages = new LinkedList<>();
 
-            while (clients.size() < 2) {
+            while (clients.size() < 8) {
                 clientSocket = serverSocket.accept();
                 ServerSideConnection ssc = new ServerSideConnection(clientSocket);
                 clients.add(ssc);
@@ -37,9 +37,10 @@ public class Server {
             Thread messageHandling = new Thread(() -> {
                 while(true){
                     try{
-                        String message = messages.poll();
-                        sendToAllClients(message);
-                        System.out.println("Message received");
+                        if(!messages.isEmpty()) {
+                            String message = messages.poll();
+                            sendToAllClients(message);
+                        }
                     } catch (Exception e) {
                         System.out.println(e.toString());
                     }

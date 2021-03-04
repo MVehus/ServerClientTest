@@ -22,15 +22,14 @@ public class Client {
 
             while (true) {
                 String userInput;
+                String inputFromServer;
                 if ((userInput = stdIn.readLine()) != null) {
                     out.println(userInput);
-                    System.out.println("echo: " + in.readLine());
                 }
-                if (in.readLine() != null) {
-                    System.out.println("Message from another user: " + in.readLine());
+                if ((inputFromServer = in.readLine()) != null) {
+                    System.out.println(inputFromServer);
                 }
             }
-
         } catch (Exception e) {
             System.out.println(e.toString());
         }
