@@ -2,10 +2,7 @@ package Test1;
 
 import Utilities.IpChecker;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -15,10 +12,11 @@ public class Server {
 
     private ServerSocket serverSocket;
     private ArrayList<ServerSideConnection> clients;
-    private LinkedBlockingQueue<String> messages;
+    private LinkedBlockingQueue<Object> messages;
     Socket clientSocket;
 
     public Server(int port) {
+        // Sets up the server and start a server socket.
         try {
             serverSocket = new ServerSocket(port);
             System.out.println("Server started");
@@ -27,6 +25,7 @@ public class Server {
             clients = new ArrayList<>();
             messages = new LinkedBlockingQueue<>();
 
+            //Handles incoming messages from clients
             new Thread(() -> {
                 while (true) {
                     if (!messages.isEmpty()) {
@@ -39,6 +38,7 @@ public class Server {
                 }
             }).start();
 
+            // Accepts incoming connections up to 8 players and starts up a new thread with their ServerSideConnection.
             while (clients.size() < 8) {
                 clientSocket = serverSocket.accept();
                 ServerSideConnection ssc = new ServerSideConnection(clientSocket);
@@ -47,22 +47,29 @@ public class Server {
                 System.out.println("Client connected");
             }
             System.out.println("Maximum number of players have joined the game. Not accepting more connections");
-
         } catch (IOException e) {
             System.out.println(e.toString());
         }
     }
 
-    public void sendToAllClients(String str) {
+    /**
+     * Sends a message to all clients connected to the server.
+     *
+     * @param obj The message to be sent
+     */
+    public void sendToAllClients(Object obj) {
         for (ServerSideConnection client : clients) {
-            client.write(str);
+            client.write(obj);
         }
     }
 
+
     private class ServerSideConnection implements Runnable {
 
-        private BufferedReader in;
-        private PrintWriter out;
+        //private BufferedReader in;
+        //private PrintWriter out;
+        private ObjectOutputStream out;
+        private ObjectInputStream in;
         Socket socket;
 
         public ServerSideConnection(Socket clientSocket) {
@@ -72,9 +79,13 @@ public class Server {
         @Override
         public void run() {
             try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                //out = new PrintWriter(clientSocket.getOutputStream(), true);
+                //in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+                out = new ObjectOutputStream(socket.getOutputStream());
+                in = new ObjectInputStream(socket.getInputStream());
+
+                /*
                 while (true) {
                     String inputLine;
                     if ((inputLine = in.readLine()) != null) {
@@ -82,14 +93,27 @@ public class Server {
                         messages.put(inputLine);
                     }
                 }
+                 */
+                while(true){
+                    Object inputObject;
+                    if((inputObject = in.readObject()) != null){
+                        System.out.println("Object " + inputObject.toString() + " from " + clientSocket.toString());
+                        messages.put(inputObject);
+                    }
+                }
             } catch (Exception e) {
                 System.out.println(e.toString());
             }
         }
 
-        public void write(String str) {
+        /**
+         * Writes a message to the client connected by this ServerSideConnection
+         *
+         * @param obj The message to be sent
+         */
+        public void write(Object obj) {
             try {
-                out.println(str);
+                out.writeObject(obj);
             } catch (Exception e) {
                 System.out.println(e.toString());
             }

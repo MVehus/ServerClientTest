@@ -7,6 +7,10 @@ import java.net.URL;
 
 public class IpChecker {
 
+    /**
+     * Retrieves you public IP
+     * @return your public IP
+     */
     public static String getIp() {
         try {
             URL whatismyip = new URL("http://checkip.amazonaws.com");

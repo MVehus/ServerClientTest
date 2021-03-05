@@ -13,6 +13,10 @@
             <id>tomp2p.net</id>
             <url>http://tomp2p.net/dev/mvn/</url>
         </repository>
+        <repository>
+            <id>clojars</id>
+            <url>http://clojars.org/repo/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -20,6 +24,11 @@
             <groupId>net.tomp2p</groupId>
             <artifactId>tomp2p-all</artifactId>
             <version>5.0-Beta8</version>
+        </dependency>
+        <dependency>
+            <groupId>kryonet</groupId>
+            <artifactId>kryonet</artifactId>
+            <version>2.21</version>
         </dependency>
     </dependencies>
 
