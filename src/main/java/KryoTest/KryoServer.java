@@ -13,11 +13,11 @@ public class KryoServer {
     Server server;
     ArrayList<Connection> clients;
 
-    public KryoServer() {
+    public KryoServer(int port) {
         server = new Server();
         server.start();
         try {
-            server.bind(32401);
+            server.bind(port);
         } catch (IOException e) {
             System.out.println(e.toString());
         }
@@ -36,5 +36,9 @@ public class KryoServer {
                 }
             }
         });
+    }
+
+    public static void main(String[] args) {
+        KryoServer server = new KryoServer(32401);
     }
 }
